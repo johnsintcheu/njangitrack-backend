@@ -1,0 +1,51 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Loan {
+  id                  String     @id @default(uuid())
+  borrowerId          String
+  groupId             String
+  principalXAF        Decimal
+  monthlyInterestRate Float      @default(8)
+  disbursedAt         DateTime   @default(now())
+  status              LoanStatus @default(ACTIVE)
+  outstandingBalanceXAF Decimal
+  projectedPayoffDate DateTime?
+  createdAt           DateTime   @default(now())
+  updatedAt           DateTime   @updatedAt
+  repayments          Repayment[]
+}
+
+model Repayment {
+  id          String   @id @default(uuid())
+  loanId      String
+  amountXAF   Decimal
+  paidAt      DateTime @default(now())
+  createdAt   DateTime @default(now())
+  loan        Loan     @relation(fields: [loanId], references: [id])
+}
+
+model AuditLog {
+  id            String   @id @default(uuid())
+  entityType    String
+  entityId      String
+  actionType    String
+  previousValue String?
+  newValue      String?
+  actorId       String
+  actorType     String
+  ipAddress     String?
+  timestampUTC  DateTime @default(now())
+}
+
+enum LoanStatus {
+  ACTIVE
+  REPAID
+  DEFAULTED
+}
