@@ -1,0 +1,47 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Fine {
+  id            String     @id @default(uuid())
+  memberId      String
+  cycleId       String
+  amountXAF     Decimal
+  reason        FineReason
+  triggeredAt   DateTime   @default(now())
+  status        FineStatus @default(OUTSTANDING)
+  disputeReason String?
+  resolvedBy    String?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+}
+
+model AuditLog {
+  id           String   @id @default(uuid())
+  entityType   String
+  entityId     String
+  actionType   String
+  previousValue String?
+  newValue     String?
+  actorId      String
+  actorType    String
+  ipAddress    String?
+  timestampUTC DateTime @default(now())
+}
+
+enum FineReason {
+  LATE
+  ABSENCE
+}
+
+enum FineStatus {
+  OUTSTANDING
+  PAID
+  WAIVED
+  DISPUTED
+}
