@@ -1,0 +1,46 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid())
+  fullName     String
+  email        String?  @unique
+  phoneNumber  String   @unique
+  quartier     String?
+  language     String   @default("fr")
+  passwordHash String
+  role         Role     @default(MEMBER)
+  kycStatus    String   @default("PENDING")
+  isActive     Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Group {
+  id                 String   @id @default(uuid())
+  name               String
+  contributionAmount Int
+  frequency          String   @default("MONTHLY")
+  startDate          DateTime
+  adminId            String
+  maxMembers         Int      @default(20)
+  socialFundAmount   Int      @default(0)
+  lateFine           Int      @default(500)
+  absenceFine        Int      @default(1000)
+  interestRate       Float    @default(8)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+enum Role {
+  MEMBER
+  TREASURER
+  GROUP_ADMIN
+  SUPER_ADMIN
+}
