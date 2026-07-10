@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Cycle {
+  id                   String         @id @default(uuid())
+  groupId              String
+  cycleNumber          Int
+  beneficiaryId        String?
+  rotationAlgorithm    String         @default("sequential")
+  startDate            DateTime
+  endDate              DateTime?
+  status               CycleStatus    @default(ACTIVE)
+  potAmountXAF         Decimal
+  confirmationPercent  Float          @default(0)
+  createdAt            DateTime       @default(now())
+  updatedAt            DateTime       @updatedAt
+  contributions        Contribution[]
+}
+
+model Contribution {
+  id            String             @id @default(uuid())
+  cycleId       String
+  memberId      String
+  amountXAF     Decimal
+  paymentMethod String
+  paymentDate   DateTime
+  status        ContributionStatus @default(PENDING)
+  proofFileUrl  String?
+  verifiedBy    String?
+  verifiedAt    DateTime?
+  note          String?
+  createdAt     DateTime           @default(now())
+  updatedAt     DateTime           @updatedAt
+  cycle         Cycle              @relation(fields: [cycleId], references: [id])
+}
+
+model AgentRunLog {
+  id                       String   @id @default(uuid())
+  agentName                String   @unique
+  lastRunAt                DateTime
+  lastRunDurationMs        Int
+  lastRunRecordsProcessed  Int
+  status                   String
+}
+
+model AuditLog {
+  id               String   @id @default(uuid())
+  entityType       String
+  entityId         String
+  actionType       String
+  previousValue    String?
+  newValue         String?
+  actorId          String
+  actorType        String
+  ipAddress        String?
+  timestampUTC     DateTime @default(now())
+}
+
+model SessionReport {
+  id                     String   @id @default(uuid())
+  groupId                String
+  title                  String
+  cycleId                String?
+  meetingDate            DateTime
+  authorId               String
+  authorName             String
+  summary                String
+  contributionsTotalXAF  Int
+  finesTotalXAF          Int
+  socialFundBalanceXAF   Int
+  beneficiaryName        String?
+  attendeesCount         Int
+  decisions              String?
+  createdAt              DateTime @default(now())
+}
+
+enum CycleStatus {
+  ACTIVE
+  CLOSED
+  PAYOUT_READY
+}
+
+enum ContributionStatus {
+  PENDING
+  CONFIRMED
+  DISPUTED
+  OVERDUE
+}
