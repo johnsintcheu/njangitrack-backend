@@ -1,0 +1,42 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model AgentRunLog {
+  id                       String   @id @default(uuid())
+  agentName                String   @unique
+  lastRunAt                DateTime
+  lastRunDurationMs        Int
+  lastRunRecordsProcessed  Int
+  status                   String
+}
+
+model Notification {
+  id             String             @id @default(uuid())
+  recipientId    String
+  type           String
+  channel        NotificationChannel
+  messageContent String
+  sentAt         DateTime?
+  deliveryStatus DeliveryStatus     @default(PENDING)
+  retryCount     Int                @default(0)
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+}
+
+enum NotificationChannel {
+  SMS
+  PUSH
+}
+
+enum DeliveryStatus {
+  PENDING
+  SENT
+  FAILED
+  RETRYING
+}
